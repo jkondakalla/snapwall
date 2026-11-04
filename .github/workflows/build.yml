@@ -4,6 +4,9 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -17,7 +20,15 @@ jobs:
         with:
           gradle-version: "8.9"
       - run: gradle :app:assembleRelease
+      - run: cp app/build/outputs/apk/release/app-release.apk snapwall.apk
       - uses: actions/upload-artifact@v4
         with:
           name: snapwall-apk
-          path: app/build/outputs/apk/release/*.apk
+          path: snapwall.apk
+      - name: Publish as the "latest" release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest snapwall.apk --title "Snapwall (latest build)" --notes "Built from ${GITHUB_SHA::7}" --target "$GITHUB_SHA"
