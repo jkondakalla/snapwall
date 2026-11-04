@@ -19,19 +19,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
-      - name: Write signing key
-        env:
-          KEYSTORE_B64: ${{ secrets.SIGNING_KEYSTORE_B64 }}
-        run: |
-          if [ -z "$KEYSTORE_B64" ]; then
-            echo "::error::SIGNING_KEYSTORE_B64 secret is missing. Without it the APK can't install as an update."
-            exit 1
-          fi
-          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/snapwall.jks"
-          echo "SIGNING_STORE_FILE=$RUNNER_TEMP/snapwall.jks" >> "$GITHUB_ENV"
       - run: gradle :app:assembleRelease
-        env:
-          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
       - run: cp app/build/outputs/apk/release/app-release.apk snapwall.apk
       - uses: actions/upload-artifact@v4
         with:

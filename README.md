@@ -17,7 +17,7 @@ Android accessibility service that backs you out when you open a Discover story 
 
 ## Signing
 
-Builds are signed with one permanent key from the `SIGNING_KEYSTORE_B64` and `SIGNING_PASSWORD` repo secrets, so each new APK installs over the last. The build fails if the secrets are missing rather than produce an APK that can't update.
+Without the `SIGNING_KEYSTORE_B64` and `SIGNING_PASSWORD` repo secrets, each build is signed with a throwaway debug key, so every new APK needs an uninstall first. Add the secrets to make builds install as updates.
 
 ## Rules
 
