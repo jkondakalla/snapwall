@@ -4,8 +4,9 @@ import android.content.Context
 
 /**
  * One rule per line:
- *   text:Discover        a visible element whose text or label is exactly "Discover"
+ *   section:Discover     opening anything listed under the "Discover" heading
  *   selected:Spotlight   the nav tab labeled "Spotlight" is the selected one
+ *   text:Some label      a visible element whose text or label is exactly this
  *   id:<view id>         a visible element with this resource id
  * Lines starting with # are ignored. Matching ignores case.
  */
@@ -13,14 +14,17 @@ data class Rule(val kind: String, val value: String)
 
 object Rules {
     private const val PREFS = "snapwall"
-    private const val KEY_RULES = "rules"
+    // v2: the v1 default (text:Discover) blocked the whole Stories tab, so saved v1 rules are dropped.
+    private const val KEY_RULES = "rules_v2"
     private const val KEY_ENABLED = "enabled"
-    private const val KEY_DUMP_NEXT = "dump_next"
+    private const val KEY_CAPTURE_UNTIL = "capture_until"
+
+    val KINDS = setOf("section", "selected", "text", "id")
 
     val DEFAULT = """
-        # Discover section heading (lives under the Stories tab)
-        text:Discover
-        # Spotlight tab in the bottom bar
+        # Opening a story or short from the Discover section
+        section:Discover
+        # Spotlight tab (it starts playing shorts as soon as it opens)
         selected:Spotlight
     """.trimIndent()
 
@@ -32,8 +36,9 @@ object Rules {
     fun enabled(c: Context) = prefs(c).getBoolean(KEY_ENABLED, true)
     fun setEnabled(c: Context, on: Boolean) = prefs(c).edit().putBoolean(KEY_ENABLED, on).apply()
 
-    fun dumpNext(c: Context) = prefs(c).getBoolean(KEY_DUMP_NEXT, false)
-    fun setDumpNext(c: Context, on: Boolean) = prefs(c).edit().putBoolean(KEY_DUMP_NEXT, on).apply()
+    /** Wall-clock ms until which the service records screens instead of blocking. */
+    fun captureUntil(c: Context) = prefs(c).getLong(KEY_CAPTURE_UNTIL, 0L)
+    fun setCaptureUntil(c: Context, t: Long) = prefs(c).edit().putLong(KEY_CAPTURE_UNTIL, t).apply()
 
     fun parse(text: String): List<Rule> = text.lines()
         .map { it.trim() }
@@ -42,5 +47,5 @@ object Rules {
             val i = it.indexOf(':')
             Rule(it.substring(0, i).trim().lowercase(), it.substring(i + 1).trim())
         }
-        .filter { it.value.isNotEmpty() && it.kind in setOf("text", "selected", "id") }
+        .filter { it.value.isNotEmpty() && it.kind in KINDS }
 }
