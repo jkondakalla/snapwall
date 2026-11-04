@@ -65,12 +65,12 @@ class MainActivity : Activity() {
         })
 
         col.addView(TextView(this).apply {
-            text = "If something slips through or gets blocked by mistake: tap Record, then in Snapchat open the Stories tab, a friend's story, a Discover story, and Spotlight. Come back, tap View capture, and copy it. Blocking is off while recording."
+            text = "If Snapchat changes its layout and something slips through: tap Capture, open Snapchat to that screen, then come back and tap View capture."
             setPadding(0, pad, 0, 0)
         })
-        col.addView(button("Record Snapchat for 60 seconds") {
-            Rules.setCaptureUntil(this, System.currentTimeMillis() + 60_000)
-            toast("Recording. Open Snapchat now.")
+        col.addView(button("Capture next Snapchat screen") {
+            Rules.setDumpNext(this, true)
+            toast("Now open the screen in Snapchat")
         })
         col.addView(button("View capture") { showDump() })
 
@@ -87,8 +87,7 @@ class MainActivity : Activity() {
         val blocking = Rules.enabled(this)
         status.text = when {
             !serviceOn -> "Not active. Turn on Snapwall in accessibility settings."
-            System.currentTimeMillis() < Rules.captureUntil(this) -> "Recording. Blocking is off until it finishes."
-            blocking -> "Active. Opening Discover or Spotlight content is blocked. Friends' stories work."
+            blocking -> "Active. Discover and Spotlight are blocked."
             else -> "Paused. The service is on but not blocking."
         }
         toggle.text = if (blocking) "Pause blocking" else "Resume blocking"
