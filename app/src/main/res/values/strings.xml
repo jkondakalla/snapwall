@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="service_description">Watches Snapchat and sends you out of it when the Discover or Spotlight feed opens. It reads only Snapchat\'s screen and stores nothing.</string>
+</resources>
